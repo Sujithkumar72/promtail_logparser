@@ -1,0 +1,46 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 9097
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://localhost:3100/loki/api/v1/push
+
+scrape_configs:
+  - job_name: catalina
+    pipeline_stages:
+    - regex:
+        expression: "(?P<ip>\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}).*\\[(?P<logtime>\\d+\\/\\w+\\/\\d+\\:\\d+:\\d+:\\d+\\s\\+\\d+)"
+    - labels:
+        ip: ip
+        logtime: logtime
+    - timestamp:
+        source: "logtime"
+        format: "23/May/2024:16:49:21 +0530"
+        location: "Asia/Calcutta"
+        #format: "Day/Month/Year:Hour:Minute:Second Timezone offset"
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: localaccess
+          __path__: /opt/tomcat1/logs/localhost_access_log.*
+#      - targets:
+#          - localhost
+#        labels:
+#          job: tomcat1
+#          __path__: /opt/tomcat1/logs/catalina.out
+#      - regex:
+#          expression: '(level|lvl|severity)=(?P<level>\\w+)'
+#      - labels:
+#          level:
+#
+#  - job_name: system
+#    static_configs:
+#      - targets:
+#          - localhost
+#        labels:
+#          job: varlogs
+#          __path__: /var/log/*log
